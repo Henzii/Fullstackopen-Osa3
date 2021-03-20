@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "build:ui": "cd ..\\Fullstackopen\\Osa2\\puhelinluettelo && npm run build --prod && xcopy /e build ..\\..\\..\\Fullstackopen-Osa3\\build\\"
   },
   "repository": {
     "type": "git",
