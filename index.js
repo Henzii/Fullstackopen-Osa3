@@ -1,8 +1,9 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
 
-
+app.use(cors())
 app.use(express.json())
 
 morgan.token('jsonData', (req, res) => {
@@ -33,13 +34,13 @@ let phonebook = [
     }
 ]
     
-app.get('/api/persons', (req, res) => {
+app.get('/persons', (req, res) => {
     res.json(phonebook)
 })
 app.get('/info', (req, res) => {
     res.send(`<p>Puhelinluettelossa ${phonebook.length} henkilöä</p>\n<p>${new Date()}</p>`)
 })
-app.post(`/api/persons`, (req, res) => {
+app.post(`/persons`, (req, res) => {
     const body = req.body
     if (!body.name) return res.status(400).json( { error: 'Anna nimi'})
     else if (!body.number) return res.status(400).json( { error: 'Anna numero'})
@@ -58,12 +59,12 @@ app.post(`/api/persons`, (req, res) => {
     res.json(newPerson)
     
 })
-app.delete(`/api/persons/:id`, (req, res) => {
+app.delete(`/persons/:id`, (req, res) => {
     const id = Number(req.params.id)
     phonebook = phonebook.filter(field => field.id !== id)
     res.status(204).end()
 })
-app.get(`/api/persons/:id`, (req, res) => {
+app.get(`/persons/:id`, (req, res) => {
     const id = Number(req.params.id)
     const field = phonebook.find(note => note.id === id)
     if (field) {
@@ -83,7 +84,7 @@ const getRandomId = () => Math.floor(Math.random() * 10000000 )
 
 
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
 app.listen(PORT, ()=>{
     console.log(`Kuunnellaan porttia ${PORT}`)
