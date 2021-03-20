@@ -8,7 +8,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "build:ui": "cd ..\\Fullstackopen\\Osa2\\puhelinluettelo && npm run build --prod && xcopy /e build ..\\..\\..\\Fullstackopen-Osa3\\build\\",
-    "send:all": "git add . && git commit -a -m 'Herokuun' && gut push heroku main",
+    "send:all": "git add . && git commit -a -m 'Herokuun' && git push heroku main",
     "heroku:log": "heroku logs --tail"
   },
   "repository": {
