@@ -9,7 +9,7 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true, useFind
     .then( () => {
         console.log('Yhdistetty MongoDB!')
     }).catch( error => {
-        console.log('Virhe yhdistettäess Mongoon!', error)
+        console.log('Virhe yhdistettäessä Mongoon!', error)
     })
 
 const pBookSchema = new mongoose.Schema( {
