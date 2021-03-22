@@ -3,6 +3,10 @@ const morgan = require('morgan')
 const cors = require('cors')
 const app = express()
 
+require('dotenv').config()
+
+const pBook = require(`./models/phonebook`)
+
 app.use(cors())
 app.use(express.json())
 app.use(express.static('build'))
@@ -21,68 +25,72 @@ app.use(morgan( (tokens, req, res) => {
         tokens.jsonData(req, res)
     ].join(' ')
 }))
-
-let phonebook = [
-    {
-        id: 1,
-        name: "Test Person",
-        number: "911",
-    },
-    {
-        id: 2,
-        name: "Second Man",
-        number: "112",
-    }
-]
-    
-app.get('/persons', (req, res) => {
-    res.json(phonebook)
+   
+app.get('/persons', (req, res, next) => {
+    pBook.find({}).then(tiedot => {
+        res.json(tiedot)
+    }).catch(error => next(error))
 })
 app.get('/info', (req, res) => {
-    res.send(`<p>Puhelinluettelossa ${phonebook.length} henkilöä</p>\n<p>${new Date()}</p>`)
+    pBook.count().then(vastaus => {
+        res.send(`
+            <p>Puhelinluettelossa yhteensä <b>${vastaus}</b> henkilöä. ${new Date}</p>
+        `)
+    })
 })
-app.post(`/persons`, (req, res) => {
+app.post(`/persons`, (req, res, next) => {
     const body = req.body
-    if (!body.name) return res.status(400).json( { error: 'Anna nimi'})
-    else if (!body.number) return res.status(400).json( { error: 'Anna numero'})
-
-    const samanNimiset = phonebook.filter(field => field.name === body.name)
-    
-    if (samanNimiset.length > 0)
-        return res.status(400).json( { error: 'Nimi on jo listalla'})
-
-    const newPerson = {
+    const newPerson = new pBook({
         name: body.name,
         number: body.number,
-        id: getRandomId(),
-    }
-    phonebook = phonebook.concat(newPerson)
-    res.json(newPerson)
+    })
+    newPerson.save().then(uusi => {
+        res.json(uusi)
+    }).catch(error => next(error))
     
 })
-app.delete(`/persons/:id`, (req, res) => {
-    const id = Number(req.params.id)
-    phonebook = phonebook.filter(field => field.id !== id)
-    res.status(204).end()
+app.delete(`/persons/:id`, (req, res, next) => {
+    const id = req.params.id
+    pBook.findByIdAndRemove(id).then(vastaus => {
+        res.status(204).end()
+    }).catch(error => next(error))
+
 })
-app.get(`/persons/:id`, (req, res) => {
-    const id = Number(req.params.id)
-    const field = phonebook.find(note => note.id === id)
-    if (field) {
-        res.json(field)
-    } else {
-        res.status(404).end()
+app.put(`/persons/:id`, (req, res, next) => {
+    const uusiPerson = {
+        number: req.body.number
     }
+    console.log(uusiPerson)
+    pBook.findByIdAndUpdate(req.params.id, uusiPerson, {new: true})
+        .then(vastaus => {
+            res.json(vastaus)
+        }).catch(error => next(error))
+})
+app.get(`/persons/:id`, (req, res, next) => {
+    const id = req.params.id
+    pBook.findById(id).then(vastaus => {
+        if (vastaus) {
+            res.json(vastaus)
+        } else {
+            res.status(404).end()
+        }
+    }).catch(error => next(error))
 
 })
 
+const errorHandler = (error, request, response, next) => {
+    if (error.name === "CastError") {
+        response.status(400).send( { error: `Epäkelpo id`})
+    } else if (error.name === "ValidationError") {
+        response.status(400).send( { error: error.message })
+    }
+    next(error)
+}
+app.use(errorHandler)
 const tuntematonSivu = (req, res) => {
     res.status(404).send({ error: 'Sivua ei löydy'})
 }
 app.use(tuntematonSivu)
-
-const getRandomId = () => Math.floor(Math.random() * 10000000 )
-
 
 
 const PORT = process.env.PORT || 3001
