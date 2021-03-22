@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 
 
 if (process.argv.length < 3) {
-    console.log("Ei tarpeeksi parametrejä...")
+    console.log('Ei tarpeeksi parametrejä...')
     process.exit(0)
 }
 
@@ -23,7 +23,7 @@ const Person = mongoose.model('Person', pBookSchema)
 
 // Jos vain salasana annettu
 if (process.argv.length === 3) {
-    console.log("Phonebook:")
+    console.log('Phonebook:')
     Person.find({}).then(res => {
         res.forEach( p => {
             console.log(`${p.name} ${p.number}`)
@@ -40,7 +40,7 @@ if (process.argv.length === 3) {
         number: pNumber
     })
 
-    newPerson.save().then(res => {
+    newPerson.save().then(() => {
         console.log(`added ${pName} number ${pNumber} to phonebook`)
         mongoose.connection.close()
     })
